@@ -28,9 +28,22 @@ function paintMini(prefix, data) {
 async function fetchMarket() {
   const url =
     "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,solana&vs_currencies=usd,brl&include_24hr_change=true&include_24hr_vol=true";
-  const res = await fetch(url);
-  if (!res.ok) throw new Error("Falha na API");
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 10_000);
+
+  const res = await fetch(url, { signal: controller.signal });
+  clearTimeout(timeoutId);
+
+  if (!res.ok) {
+    const err = new Error(`Falha na API (${res.status})`);
+    err.status = res.status;
+    throw err;
+  }
+
   const data = await res.json();
+  if (!data.bitcoin || !data.solana) throw new Error("Resposta incompleta da API");
+
   return {
     btc: mapAsset("bitcoin", data.bitcoin),
     sol: mapAsset("solana", data.solana),
@@ -80,11 +93,18 @@ async function loadData() {
     const live = await fetchMarket();
     paintAll(live);
     updateStamp();
+    setHealth("online");
+    scheduleInterval(REFRESH_MS_OK);
   } catch (err) {
     console.error(err);
-    // fallback leve com última leitura exibida
-    el("global-sentiment").textContent = "Erro API — tente novamente";
-    el("last-updated").textContent = "Falha ao atualizar";
+    const message =
+      err?.status === 429
+        ? "Rate limit: espere 2 min"
+        : err?.name === "AbortError"
+        ? "Timeout na API"
+        : "Erro API — tentando novamente";
+    setHealth("error", message);
+    scheduleInterval(REFRESH_MS_BACKOFF);
   } finally {
     setLoading(false);
   }
@@ -93,12 +113,13 @@ async function loadData() {
 document.getElementById("refresh").addEventListener("click", loadData);
 
 // --- Atualização contínua ---
-const REFRESH_MS = 60_000;
+const REFRESH_MS_OK = 60_000;
+const REFRESH_MS_BACKOFF = 120_000;
 let intervalId;
 
-function startAutoRefresh() {
+function scheduleInterval(delay) {
   if (intervalId) clearInterval(intervalId);
-  intervalId = setInterval(loadData, REFRESH_MS);
+  intervalId = setInterval(loadData, delay);
 }
 
 function updateStamp() {
@@ -109,7 +130,7 @@ function updateStamp() {
 }
 
 // Carrega dados iniciais e inicia auto-refresh
-loadData().then(startAutoRefresh);
+loadData().then(() => scheduleInterval(REFRESH_MS_OK));
 
 // Revalida sempre que o usuário volta para a aba
 document.addEventListener("visibilitychange", () => {
@@ -120,6 +141,18 @@ function setLoading(state) {
   const btn = document.getElementById("refresh");
   btn.disabled = state;
   btn.textContent = state ? "⌛ Atualizando..." : "↻ Atualizar";
+}
+
+function setHealth(status, message) {
+  if (status === "online") {
+    el("last-updated").textContent =
+      el("last-updated").textContent || "Atualizado";
+    el("global-sentiment").textContent =
+      el("global-sentiment").textContent || "Neutro";
+    return;
+  }
+  el("last-updated").textContent = message || "Falha ao atualizar";
+  pushToast("API instável", message || "Tente novamente em instantes", "sell");
 }
 
 // --- Alertas de compra/venda ---
