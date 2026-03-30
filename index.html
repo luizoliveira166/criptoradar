@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cripto Radar — BTC & SOL</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="page">
+    <div id="alert-stack" aria-live="polite"></div>
+    <header class="topbar">
+      <div class="brand">
+        <p class="eyebrow">Desk Pro | Cripto</p>
+        <h1>Cripto Radar</h1>
+        <p class="subhead">Monitor técnico desenhado para decisões rápidas em BTC e SOL.</p>
+      </div>
+      <div class="actions">
+        <button id="refresh" aria-label="Atualizar dados">↻ Atualizar</button>
+        <a class="ghost" href="#cards">Ver painéis</a>
+      </div>
+      <p id="last-updated" class="sync">Sincronizando...</p>
+    </header>
+
+    <section class="ticker" aria-label="Indicadores rápidos">
+      <div class="tick">
+        <span>BTC</span>
+        <strong id="btc-mini-price">--</strong>
+        <small id="btc-mini-change">--</small>
+      </div>
+      <div class="tick">
+        <span>SOL</span>
+        <strong id="sol-mini-price">--</strong>
+        <small id="sol-mini-change">--</small>
+      </div>
+      <div class="tick muted">
+        <span>Sentimento</span>
+        <strong id="global-sentiment">--</strong>
+        <small>mercado</small>
+      </div>
+    </section>
+
+    <main id="cards" class="grid">
+      <section class="card" id="btc-card">
+        <div class="card-head">
+          <div>
+            <p class="eyebrow">Bitcoin</p>
+            <h2>BTC</h2>
+          </div>
+          <span class="chip wait" id="btc-signal">ESPERA</span>
+        </div>
+        <dl class="metrics">
+          <div><dt>Preço</dt><dd id="btc-price">--</dd></div>
+          <div><dt>24h</dt><dd id="btc-change">--</dd></div>
+          <div><dt>Volume</dt><dd id="btc-volume">--</dd></div>
+          <div><dt>Tendência</dt><dd id="btc-trend">--</dd></div>
+          <div><dt>Suporte</dt><dd id="btc-support">--</dd></div>
+          <div><dt>Resistência</dt><dd id="btc-resistance">--</dd></div>
+          <div><dt>Sentimento</dt><dd id="btc-sentiment">--</dd></div>
+        </dl>
+        <p class="justify" id="btc-justification">Aguardando dados.</p>
+      </section>
+
+      <section class="card" id="sol-card">
+        <div class="card-head">
+          <div>
+            <p class="eyebrow">Solana</p>
+            <h2>SOL</h2>
+          </div>
+          <span class="chip wait" id="sol-signal">ESPERA</span>
+        </div>
+        <dl class="metrics">
+          <div><dt>Preço</dt><dd id="sol-price">--</dd></div>
+          <div><dt>24h</dt><dd id="sol-change">--</dd></div>
+          <div><dt>Volume</dt><dd id="sol-volume">--</dd></div>
+          <div><dt>Tendência</dt><dd id="sol-trend">--</dd></div>
+          <div><dt>Suporte</dt><dd id="sol-support">--</dd></div>
+          <div><dt>Resistência</dt><dd id="sol-resistance">--</dd></div>
+          <div><dt>Sentimento</dt><dd id="sol-sentiment">--</dd></div>
+        </dl>
+        <p class="justify" id="sol-justification">Aguardando dados.</p>
+      </section>
+    </main>
+
+    <section class="note">
+      <h3>Integração</h3>
+      <p>Substitua os dados de exemplo em <code>script.js</code> por sua API (CoinGecko, Binance, Kraken). O layout é mobile-first e expande para desktop com cards lado a lado.</p>
+    </section>
+
+    <section class="markets">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Pesquisa de mercado</p>
+          <h3>Onde captar alavancagem & comprar spot</h3>
+        </div>
+        <div class="legend">
+          <span class="pill buy">Bom para compra</span>
+          <span class="pill sell">Bom para venda</span>
+          <span class="pill alert">Alerta / risco</span>
+        </div>
+      </div>
+      <div class="list-grid">
+        <article class="list-card">
+          <h4>Empréstimo / Funding p/ Alavancagem</h4>
+          <ul>
+            <li><span class="pill buy">bom compra</span> Binance Margin / Futures — liquidez profunda, até 125x (verificar restrições regionais).</li>
+            <li><span class="pill buy">bom compra</span> OKX Portfolio Margin — cross multi‑ativos com regulação MiFID II na UE.</li>
+            <li><span class="pill sell">bom venda</span> Bybit Unified Margin — derivativos líquidos, boa para operações short.</li>
+            <li><span class="pill alert">alerta</span> PrimeXBT 1000x — altíssima alavancagem; usar somente tamanho reduzido.</li>
+            <li><span class="pill alert">alerta</span> Funding P2P Bitfinex — custos variáveis; monitorar taxas antes de travar.</li>
+          </ul>
+        </article>
+        <article class="list-card">
+          <h4>Corretoras de prestígio para compra spot</h4>
+          <ul>
+            <li><span class="pill buy">bom compra</span> Coinbase Advanced — ambiente regulado EUA, UX simples.</li>
+            <li><span class="pill buy">bom compra</span> Kraken — histórico de segurança, bom para USD/EUR.</li>
+            <li><span class="pill buy">bom compra</span> Binance Spot — melhor profundidade para BTC/SOL.</li>
+            <li><span class="pill sell">bom venda</span> OKX Spot — liquidez sólida; útil para saída rápida.</li>
+            <li><span class="pill alert">alerta</span> Corretoras menores locais — avaliar licença, prova de reservas e seguro.</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <footer class="foot">
+      <p>Design focado em leitura rápida: contraste alto, tipografia densa e hierarquia clara para decisões no mercado financeiro.</p>
+    </footer>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
