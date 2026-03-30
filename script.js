@@ -24,33 +24,78 @@ function paintMini(prefix, data) {
   el(`${prefix}-mini-change`).textContent = data.change;
 }
 
-// --- Integração CoinGecko (sem chave, sujeito a rate-limit) ---
-async function fetchMarket() {
-  const url =
-    "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,solana&vs_currencies=usd,brl&include_24hr_change=true&include_24hr_vol=true";
+// --- Integração com redundância (CoinGecko primária, Binance fallback) ---
+const FETCH_TIMEOUT = 10_000;
 
+async function fetchWithTimeout(url) {
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 10_000);
-
+  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT);
   const res = await fetch(url, { signal: controller.signal });
-  clearTimeout(timeoutId);
-
+  clearTimeout(timer);
   if (!res.ok) {
     const err = new Error(`Falha na API (${res.status})`);
     err.status = res.status;
     throw err;
   }
+  return res.json();
+}
 
-  const data = await res.json();
-  if (!data.bitcoin || !data.solana) throw new Error("Resposta incompleta da API");
+async function fetchMarket() {
+  // 1) Tentativa CoinGecko
+  try {
+    const url =
+      "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,solana&vs_currencies=usd,brl&include_24hr_change=true&include_24hr_vol=true";
+    const data = await fetchWithTimeout(url);
+    if (!data.bitcoin || !data.solana) throw new Error("Resposta incompleta da API");
+    return {
+      btc: mapAsset(data.bitcoin),
+      sol: mapAsset(data.solana),
+      source: "CoinGecko",
+    };
+  } catch (err) {
+    console.warn("CoinGecko falhou, tentando Binance...", err);
+  }
+
+  // 2) Fallback Binance 24h ticker
+  const [btc, sol] = await Promise.all([
+    fetchWithTimeout("https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT"),
+    fetchWithTimeout("https://api.binance.com/api/v3/ticker/24hr?symbol=SOLUSDT"),
+  ]);
 
   return {
-    btc: mapAsset("bitcoin", data.bitcoin),
-    sol: mapAsset("solana", data.solana),
+    btc: mapBinance(btc),
+    sol: mapBinance(sol),
+    source: "Binance",
   };
 }
 
-function mapAsset(name, d) {
+function mapBinance(d) {
+  const priceUsd = parseFloat(d.lastPrice);
+  const volUsd = parseFloat(d.quoteVolume); // já em USD para par USDT
+  const change = parseFloat(d.priceChangePercent);
+
+  const trend = change > 1 ? "Alta" : change < -1 ? "Baixa" : "Lateral";
+  const sentiment = change > 0 ? "Otimista" : change < -2 ? "Pessimista" : "Neutro";
+  const signal =
+    change > 1.5 ? "COMPRA" : change < -1.5 ? "VENDA" : "ESPERA";
+
+  const support = priceUsd * 0.97;
+  const resistance = priceUsd * 1.05;
+
+  return {
+    price: `US$ ${priceUsd.toLocaleString("en-US", { maximumFractionDigits: 2 })}`,
+    change: `${change.toFixed(2)}%`,
+    volume: `US$ ${(volUsd / 1e9).toFixed(2)}B`,
+    trend,
+    support: `US$ ${support.toLocaleString("en-US", { maximumFractionDigits: 0 })}`,
+    resistance: `US$ ${resistance.toLocaleString("en-US", { maximumFractionDigits: 0 })}`,
+    sentiment,
+    signal,
+    justification: `Variação 24h em ${change.toFixed(2)}%. Tendência ${trend.toLowerCase()} com suporte em ${support.toFixed(0)} e resistência em ${resistance.toFixed(0)}. Fonte: Binance.`,
+  };
+}
+
+function mapAsset(d) {
   const priceUsd = d.usd;
   const volUsd = d.usd_24h_vol;
   const change = d.usd_24h_change;
@@ -85,6 +130,10 @@ function paintAll(dataset) {
   el("global-sentiment").textContent = dataset.btc.sentiment;
   triggerAlerts("btc", dataset.btc);
   triggerAlerts("sol", dataset.sol);
+  if (dataset.source) {
+    el("last-updated").textContent =
+      (el("last-updated").textContent || "Atualizado") + ` · Fonte: ${dataset.source}`;
+  }
 }
 
 async function loadData() {
