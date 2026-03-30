@@ -160,8 +160,7 @@ function pushToast(title, text, variant) {
 
 // --- Doação ---
 const wallets = {
-  btc: "bc1qexamplebtcaddress123456789",
-  sol: "6oExampleSolAddress123456789abcdef",
+  btc: "luizoliveira197@bipa.app", // Lightning address para BTC
 };
 
 async function copyAddress(chain = "btc") {
