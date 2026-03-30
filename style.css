@@ -148,6 +148,10 @@ body {
   flex-wrap: wrap;
 }
 
+#doar {
+  scroll-margin-top: 80px;
+}
+
 #last-updated.sync {
   margin-top: 4px;
   color: var(--muted);
@@ -310,6 +314,32 @@ dd {
 }
 
 .note h3 { color: var(--text); margin-bottom: 6px; }
+
+.donate {
+  display: grid;
+  gap: 10px;
+}
+
+.donate-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.cta {
+  background: var(--accent);
+  color: #04101d;
+  border: none;
+  border-radius: 14px;
+  padding: 10px 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 120ms ease, box-shadow 120ms ease;
+  box-shadow: 0 12px 30px rgba(95,224,181,0.35);
+}
+
+.cta:hover { transform: translateY(-2px); }
+.cta:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
 
 .markets {
   margin-top: 22px;

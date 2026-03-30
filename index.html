@@ -17,6 +17,7 @@
         <p class="subhead">Monitor técnico desenhado para decisões rápidas em BTC e SOL.</p>
       </div>
       <div class="actions">
+        <a class="ghost" href="#doar">Doar</a>
         <button id="refresh" aria-label="Atualizar dados">↻ Atualizar</button>
         <a class="ghost" href="#cards">Ver painéis</a>
       </div>
@@ -86,6 +87,19 @@
     <section class="note">
       <h3>Integração</h3>
       <p>Substitua os dados de exemplo em <code>script.js</code> por sua API (CoinGecko, Binance, Kraken). O layout é mobile-first e expande para desktop com cards lado a lado.</p>
+    </section>
+
+    <section id="doar" class="donate card">
+      <div>
+        <p class="eyebrow">Apoie o projeto</p>
+        <h3>Doar</h3>
+        <p class="subhead">Se este painel te ajuda, considere uma doação para manter a infraestrutura.</p>
+      </div>
+      <div class="donate-actions">
+        <button class="cta" onclick="copyAddress()">Copiar endereço BTC</button>
+        <button class="ghost" onclick="copyAddress('sol')">Copiar endereço SOL</button>
+      </div>
+      <p id="donate-feedback" class="sync"></p>
     </section>
 
     <section class="markets">

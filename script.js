@@ -157,3 +157,20 @@ function pushToast(title, text, variant) {
   stack.appendChild(toast);
   setTimeout(() => toast.remove(), 5200);
 }
+
+// --- Doação ---
+const wallets = {
+  btc: "bc1qexamplebtcaddress123456789",
+  sol: "6oExampleSolAddress123456789abcdef",
+};
+
+async function copyAddress(chain = "btc") {
+  const out = wallets[chain] || wallets.btc;
+  try {
+    await navigator.clipboard.writeText(out);
+    el("donate-feedback").textContent = `${chain.toUpperCase()} copiado!`;
+  } catch (err) {
+    console.error(err);
+    el("donate-feedback").textContent = "Não foi possível copiar.";
+  }
+}
